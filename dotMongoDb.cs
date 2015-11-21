@@ -27,7 +27,7 @@ namespace dotMongo.Core
 
         private void Initialize(string connectionStringName)
         {
-            // parse the connectionstring "Server=mongodb://192.168.2.10:27000; Database=dotMongo"
+            // parse the connectionstring e.g. "Server=mongodb://192.168.2.10:27000; Database=dotMongo"
             var connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
             if (!string.IsNullOrEmpty(connectionString))
             {
@@ -61,5 +61,11 @@ namespace dotMongo.Core
         {
             return new DotMongoCollection<T>(_db);
         }
+
+        public IDotMongoCollection<T> GetCollection<T>(string collectionName) where T : class
+        {
+            return new DotMongoCollection<T>(_db, collectionName);
+        }
+
     }
 }

@@ -11,20 +11,25 @@ namespace dotMongo.Core
     {
         IMongoCollection<BsonDocument> MongoCollection { get; set; }
 
-        //Task<IEnumerable<T>> Where(Expression<Func<T, bool>> filter);
         Task<IEnumerable<T>> Where(FilterDefinition<BsonDocument> filter);
-        Task<T> FirstOrDefault(FilterDefinition<BsonDocument> filter);
-        Task<T> FirstOrDefault(Expression<Func<T, bool>> expression);
+        Task<T> FirstOrDefault(FilterDefinition<BsonDocument> filter);        
         Task<T> First(FilterDefinition<BsonDocument> filter);
         Task<T> SingleOrDefault(FilterDefinition<BsonDocument> filter);
         Task<T> Single(FilterDefinition<BsonDocument> filter);
-        Task Insert(T item);
-        Task InsertMany(IEnumerable<T> items);
         Task Delete(FilterDefinition<BsonDocument> filter);
         Task DeleteMany(FilterDefinition<BsonDocument> filter);
-        Task<long> Count();
         Task<long> Count(FilterDefinition<BsonDocument> filter);
+        Task<long> Count();
+        Task Insert(T item);
+        Task InsertMany(IEnumerable<T> items);
 
-        Task<IEnumerable<T>> WhereDynamic(FilterDefinition<BsonDocument> filter);
+        Task<IEnumerable<T>> Where(Expression<Func<T, bool>> expression);
+        Task<T> FirstOrDefault(Expression<Func<T, bool>> expression);
+        Task<T> First(Expression<Func<T, bool>> expression);
+        Task<T> SingleOrDefault(Expression<Func<T, bool>> expression);
+        Task<T> Single(Expression<Func<T, bool>> expression);
+        Task Delete(Expression<Func<T, bool>> expression);
+        Task DeleteMany(Expression<Func<T, bool>> expression);
+        Task<long> Count(Expression<Func<T, bool>> expression);
     }
 }
