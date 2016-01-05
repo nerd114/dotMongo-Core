@@ -40,11 +40,21 @@ namespace dotMongo.Core
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="collectionName"></param>
         public DotMongoCollection(IMongoDatabase db, string collectionName)
         {
             MongoCollection = db.GetCollection<BsonDocument>(collectionName);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         public async Task<IEnumerable<T>> Where(FilterDefinition<BsonDocument> filter)
         {
             var items = new List<T>();
@@ -64,6 +74,11 @@ namespace dotMongo.Core
             return items;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         public async Task<IEnumerable<T>> Where(Expression<Func<T, bool>> expression)
         {
             var items = new List<T>();
@@ -121,6 +136,11 @@ namespace dotMongo.Core
             return default(T); // return null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         public async Task<T> First(FilterDefinition<BsonDocument> filter)
         {
             return BsonSerializer.Deserialize<T>(await MongoCollection.Find(filter).FirstAsync());
@@ -137,11 +157,21 @@ namespace dotMongo.Core
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         public async Task<T> SingleOrDefault(FilterDefinition<BsonDocument> filter)
         {
             return BsonSerializer.Deserialize<T>(await MongoCollection.Find(filter).SingleOrDefaultAsync());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         public async Task<T> SingleOrDefault(Expression<Func<T, bool>> expression)
         {
             if (IsBinaryExpression(expression))
@@ -156,11 +186,21 @@ namespace dotMongo.Core
             return default(T);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         public async Task<T> Single(FilterDefinition<BsonDocument> filter)
         {
             return BsonSerializer.Deserialize<T>(await MongoCollection.Find(filter).SingleAsync());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         public async Task<T> Single(Expression<Func<T, bool>> expression)
         {
             if (expression.Body is BinaryExpression)
@@ -173,11 +213,21 @@ namespace dotMongo.Core
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         public async Task Delete(FilterDefinition<BsonDocument> filter)
         {
             await MongoCollection.DeleteOneAsync(filter);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         public async Task Delete(Expression<Func<T, bool>> expression)
         {
             if (expression.Body is BinaryExpression)
@@ -190,11 +240,21 @@ namespace dotMongo.Core
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         public async Task DeleteMany(FilterDefinition<BsonDocument> filter)
         {
             await MongoCollection.DeleteManyAsync(filter);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         public async Task DeleteMany(Expression<Func<T, bool>> expression)
         {
             if (expression.Body is BinaryExpression)
@@ -207,11 +267,21 @@ namespace dotMongo.Core
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         public async Task<long> Count(FilterDefinition<BsonDocument> filter)
         {
             return await MongoCollection.CountAsync(filter);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         public async Task<long> Count(Expression<Func<T, bool>> expression)
         {
             if (expression.Body is BinaryExpression)
@@ -224,16 +294,30 @@ namespace dotMongo.Core
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<long> Count()
         {
             return await MongoCollection.CountAsync(new BsonDocument());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public async Task Insert(T item)
         {
             await MongoCollection.InsertOneAsync(item.ToBsonDocument());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns></returns>
         public async Task InsertMany(IEnumerable<T> items)
         {
             await MongoCollection.InsertManyAsync(items.Select(s => s.ToBsonDocument()));
@@ -423,6 +507,9 @@ namespace dotMongo.Core
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
