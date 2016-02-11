@@ -1,4 +1,4 @@
-﻿v0.0.1.0 (Build: Jan-6-2016)
+﻿v0.0.1 (Build: Jan-6-2016)
 - Initial Release
 - New : Basic query functions e.g. Where, Single, First.
 - New : Basic CRUD e.g. Insert, Delete.
@@ -6,4 +6,4 @@
 - New : Ping method.
 - New : Connection string parser.
 - New : Credential authentication when creating MongoDB client.
-- Upd : Upgraded MongoDB .NET driver dependency from version 2.1.0 to version 2.2.0.
+- Upd : Upgraded MongoDB .NET driver dependency to version 2.2.3.
