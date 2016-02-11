@@ -1,4 +1,4 @@
-# dotMongo Project (v0.0.1.0)
+# [dotMongo Project (v0.0.1.0)](http://dotmongo.com/)
 dotMongo is a C#.NET open source project that (tries to) extend and simplify MongoDB database function calls for .NET developers. 
 The project wraps around the MongoDB .NET Driver (v2.2.3) and handles;
 
@@ -23,4 +23,6 @@ is equal to this code using dotMongo:
 widget.Where(x => x.X == 10 && x.Y < 20);
 ```
 
-We still recommend that you read and learn MongoDB .NET Driver. dotMongo is intended as an add-on to the MongoDB .NET Driver. Nothing beats learning the basics! 
+We still recommend that you read and learn MongoDB .NET Driver. dotMongo is intended as an add-on to the MongoDB .NET Driver. Nothing beats learning the basics!
+
+Visit [dotMongo's web page](http://dotmongo.com/) for more info!
