@@ -1,4 +1,8 @@
-﻿v0.0.1 (Build: Jan-6-2016)
+﻿v0.0.2 (Build Feb-17-2016)
+- New : Added support for querying data by ObjectId
+- New : Update function (Single record)
+
+v0.0.1 (Build: Jan-6-2016)
 - Initial Release
 - New : Basic query functions e.g. Where, Single, First.
 - New : Basic CRUD e.g. Insert, Delete.

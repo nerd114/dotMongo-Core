@@ -323,13 +323,113 @@ namespace dotMongo.Core
             await MongoCollection.InsertManyAsync(items.Select(s => s.ToBsonDocument()));
         }
 
+        public async Task<UpdateResult> Update(T item)
+        {
+            // extract the ObjectId and use it to create the Filter Definition
+            bool withObjId = false;
+            var filterName = "";
+            var filterValue = new ObjectId();
+            Dictionary<string, object> updateDictionary = new Dictionary<string, object>();
+            
+            var props = item.GetType().GetProperties();
+            if (props.Length > 0)
+            {
+                foreach (var prop in props)
+                {
+                    if (prop.PropertyType.Name == "ObjectId")
+                    {
+                        withObjId = true;
+                        // save values to be used for filter builder
+                        filterName = prop.Name.Contains("Id") ? "_id" : prop.Name;
+                        filterValue = new ObjectId(prop.GetValue(item).ToString());
+                    }
+                    else
+                    {
+                        // add to the dictionary for the Update Builder
+                        if (prop.CanWrite)
+                        {
+                            object gotValue = null;
+                            if (prop.GetValue(item) != null)
+                            {
+                                gotValue = ConvertToValue(item, prop);
+                            }
+
+                            updateDictionary.Add(prop.Name, gotValue);
+                        }
+                    }
+                }
+            }
+
+            if (withObjId)
+            {
+                var update = CreateUpdateDefinition(updateDictionary);
+                var filter = Builders<BsonDocument>.Filter.Eq(filterName, filterValue);
+                return await MongoCollection.UpdateOneAsync(filter, update);
+            }
+
+            return null;
+        }
+
+        private object ConvertToValue(T item, PropertyInfo prop)
+        {
+            switch (prop.PropertyType.FullName)
+            {
+                case "System.String":
+                    return prop.GetValue(item).ToString();
+                case "System.Boolean":
+                    return Convert.ToBoolean(prop.GetValue(item));
+                case "System.Int16":
+                    return Convert.ToInt16(prop.GetValue(item));
+                case "System.Int32":
+                    return Convert.ToInt32(prop.GetValue(item));
+                case "System.Int64":
+                    return Convert.ToInt64(prop.GetValue(item));
+                case "System.Decimal":
+                    return Convert.ToDecimal(prop.GetValue(item));
+                case "System.Single":
+                    return Convert.ToSingle(prop.GetValue(item));
+                case "System.Double":
+                    return Convert.ToDouble(prop.GetValue(item));
+                case "System.Byte":
+                    return Convert.ToByte(prop.GetValue(item));
+                case "System.Char":
+                    return Convert.ToChar(prop.GetValue(item));
+                case "System.DateTime":
+                    return Convert.ToDateTime(prop.GetValue(item));
+                case "System.UInt16":
+                    return Convert.ToUInt16(prop.GetValue(item));
+                case "System.UInt32":
+                    return Convert.ToUInt32(prop.GetValue(item));
+                case "System.UInt64":
+                    return Convert.ToUInt64(prop.GetValue(item));
+            }
+
+            return null;
+        }
+
+        private UpdateDefinition<BsonDocument> CreateUpdateDefinition(Dictionary<string, object> updateDictionary)
+        {
+            // create the Update Builder
+            var ubuilder = Builders<BsonDocument>.Update;
+
+            List<UpdateDefinition<BsonDocument>> updates = new List<UpdateDefinition<BsonDocument>>();
+            foreach (var update in updateDictionary)
+            {
+                updates.Add(ubuilder.Set(update.Key, update.Value));
+            }
+
+            return ubuilder.Combine(updates);
+        }
+
         private FilterDefinition<BsonDocument> ParseExpression(BinaryExpression binary)
         {
             if (IsRelationalNode(binary.NodeType)) // evaluating Member.Name = Value (e.g. x.User == "James")
             {
                 ValidateParts(binary);
 
-                return BuildFilterDefinition(binary.NodeType, (MemberExpression)binary.Left, (ConstantExpression)binary.Right);
+                return binary.Right.Type.Name != "ObjectId" 
+                    ? BuildFilterDefinition(binary.NodeType, (MemberExpression)binary.Left, (ConstantExpression)binary.Right) 
+                    : BuildFilterDefinition(binary.NodeType, (MemberExpression)binary.Left, binary.Right);
 
             } else if (IsLogicalNode(binary.NodeType))
             {
@@ -439,6 +539,37 @@ namespace dotMongo.Core
             }
         }
 
+        private FilterDefinition<BsonDocument> BuildFilterDefinition(ExpressionType node, MemberExpression left, Expression right)
+        { 
+            // complie the expression and assign to delegate
+            LambdaExpression lambda = Expression.Lambda(right);
+            Delegate d = lambda.Compile();
+
+            // invoke the delegate object to get the value
+            object value = d.DynamicInvoke(new object[0]);
+
+            // use the "_id" instead of the C# name
+            string name = left.Member.Name.Contains("Id") ? "_id" : left.Member.Name;
+
+            switch (node)
+            {
+                case ExpressionType.Equal:
+                    return Builders<BsonDocument>.Filter.Eq(name, value);
+                case ExpressionType.GreaterThan:
+                    return Builders<BsonDocument>.Filter.Gt(name, value);
+                case ExpressionType.GreaterThanOrEqual:
+                    return Builders<BsonDocument>.Filter.Gte(name, value);
+                case ExpressionType.LessThan:
+                    return Builders<BsonDocument>.Filter.Lt(name, value);
+                case ExpressionType.LessThanOrEqual:
+                    return Builders<BsonDocument>.Filter.Lte(name, value);
+                case ExpressionType.NotEqual:
+                    return Builders<BsonDocument>.Filter.Ne(name, value);
+                default:
+                    throw new ArgumentException($"'{node.ToString()}' comparison not supported in expression.");
+            }
+        }
+
         // 
         /// <summary>
         /// Check if node type (NodeType) is Logical Operator
@@ -483,8 +614,8 @@ namespace dotMongo.Core
             if (!(binary.Left is MemberExpression))
                 throw new ArgumentException($"Member expected in expression '{binary.ToString()}'.");
 
-            if (!(binary.Right is ConstantExpression))
-                throw new ArgumentException($"Constant expected in expression '{binary.ToString()}'.");
+            if (!(binary.Right is ConstantExpression) && binary.Right.Type.Name != "ObjectId")
+                throw new ArgumentException($"Constant or ObjectId expected in expression '{binary.ToString()}'.");
         }
 
         private void ValidateOperands(BinaryExpression binary)

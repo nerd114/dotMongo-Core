@@ -22,6 +22,7 @@ namespace dotMongo.Core
         Task<long> Count();
         Task Insert(T item);
         Task InsertMany(IEnumerable<T> items);
+        Task<UpdateResult> Update(T item);
 
         Task<IEnumerable<T>> Where(Expression<Func<T, bool>> expression);
         Task<T> FirstOrDefault(Expression<Func<T, bool>> expression);
